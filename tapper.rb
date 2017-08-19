@@ -1,5 +1,17 @@
 #!/usr/bin/env ruby
 require 'find'
+require 'yaml'
+
+settings = YAML.load_file("./settings.yaml")
+use_heartbeat = false
+if settings.key?("use_heartbeat") then
+  use_heartbeat = settings["use_heartbeat"]
+end
+
+tap_program = 'echo'
+if settings.key?("tap_program") then
+  tap_program = settings['tap_program']
+end
 
 class WatchedFile
   def initialize(path)
@@ -24,10 +36,8 @@ class WatchedFile
   end
 end
 
-tap_program = 'cat'
 path = "./"
 tap_rate = 0.5
-use_heartbeat = true
 
 WatchList = []
 Find.find(path) do |f| WatchList << WatchedFile.new(f) end
@@ -58,10 +68,10 @@ while true do
   if use_heartbeat or didFilesChange then
 
     if didFilesChange then
-      puts "#{changedFiles.count}"
+      puts "Files changed: #{changedFiles.count}"
     end
 
     flattened = changedFiles.map { |s| "'#{s}'" }.join(' ')
-    puts "#{tap_program} #{path} #{flattened}"
+    puts `#{tap_program} #{path} #{flattened}`
   end
 end
