@@ -1,0 +1,4 @@
+use_heartbeat: true
+tap_rate: 0.5
+monitor_dir: "./"
+tap_program: "cat"
